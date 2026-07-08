@@ -229,6 +229,8 @@ class DesktopPet:
 
     def _drag_end(self, e):
         self.dragging = False
+        if self.state == "walk":
+            self._set_state("idle")
         self.next_act = time.time() + 1.0
 
     # ==================== 右键菜单 ====================
@@ -274,7 +276,7 @@ class DesktopPet:
     def _decide(self):
         """自动行为选择器"""
         if self.state in ("sleep", "stretch"):
-            if time.time() - self.next_act + 3 > 0:  # 睡/伸够久了
+            if time.time() >= self.next_act:  # 睡/伸够久了
                 self._set_state("idle")
                 self.next_act = time.time() + random.uniform(1, 3)
             return
@@ -311,7 +313,8 @@ class DesktopPet:
         self.ty = random.randint(margin, self.sh - WIN_H - margin)
         self.moving = True
         dist = math.hypot(self.tx - self.px, self.ty - self.py)
-        sec = dist / (SPEED * 1000 / MOVE_MS / 60) + 0.5
+        # 速度 = SPEED px/帧 × 1000ms/MOVE_MS 帧/s
+        sec = dist / (SPEED * 1000 / MOVE_MS) + 0.5
         self.next_act = time.time() + max(sec, 2.0)
 
     # ==================== 移动 ====================
